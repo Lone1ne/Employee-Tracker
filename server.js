@@ -137,53 +137,60 @@ function promptUser() {
           });
           break;
         case "Add an employee":
-          inquirer
-            .prompt([
-              {
-                type: "input",
-                name: "employeeFirstName",
-                message: "Employee first name: ",
-              },
-              {
-                type: "input",
-                name: "employeeLastName",
-                message: "Employee last name: ",
-              },
-              {
-                type: "number",
-                name: "employeeRoleId",
-                message: "Role ID: ",
-              },
-              {
-                type: "number",
-                name: "employeeManagerId",
-                message: "Manager ID: ",
-              },
-            ])
-            .then((employeeResults) => {
-              employeeResults.employeeManagerId =
-                employeeResults.employeeManagerId
-                  ? employeeResults.employeeManagerId
-                  : null;
-              db.query(
-                "INSERT INTO employee(first_name, last_name, role_id, manager_id)VALUES(?, ?, ?, ?);",
-                [
-                  employeeResults.employeeFirstName,
-                  employeeResults.employeeLastName,
-                  employeeResults.employeeRoleId,
-                  employeeResults.employeeManagerId,
-                ],
-                (err, results) => {
-                  if (err) {
-                    console.log(err);
+          db.query("SELECT * FROM role", (err, roles) => {
+            const roleChoices = roles.map((role) => ({
+              name: role.title,
+              value: role.id,
+            }));
+            inquirer
+              .prompt([
+                {
+                  type: "input",
+                  name: "employeeFirstName",
+                  message: "Employee first name: ",
+                },
+                {
+                  type: "input",
+                  name: "employeeLastName",
+                  message: "Employee last name: ",
+                },
+                {
+                  type: "list",
+                  name: "employeeRoleId",
+                  message: "Role: ",
+                  choices: roleChoices,
+                },
+                {
+                  type: "number",
+                  name: "employeeManagerId",
+                  message: "Manager ID: ",
+                },
+              ])
+              .then((employeeResults) => {
+                employeeResults.employeeManagerId =
+                  employeeResults.employeeManagerId
+                    ? employeeResults.employeeManagerId
+                    : null;
+                db.query(
+                  "INSERT INTO employee(first_name, last_name, role_id, manager_id)VALUES(?, ?, ?, ?);",
+                  [
+                    employeeResults.employeeFirstName,
+                    employeeResults.employeeLastName,
+                    employeeResults.employeeRoleId,
+                    employeeResults.employeeManagerId,
+                  ],
+                  (err, results) => {
+                    if (err) {
+                      console.log(err);
+                    }
+                    console.log(
+                      `Sucess in adding ${employeeResults.employeeFirstName} ${employeeResults.employeeLastName} to the employee table`
+                    );
+                    promptUser();
                   }
-                  console.log(
-                    `Sucess in adding ${employeeResults.employeeFirstName} ${employeeResults.employeeLastName} to the employee table`
-                  );
-                  promptUser();
-                }
-              );
-            });
+                );
+              });
+          });
           break;
       }
     });
