@@ -59,9 +59,10 @@ function promptUser() {
         case "View all employees":
           db.query(
             `SELECT 
-            e1.first_name, e1.last_name, 
-            r.title AS role, r.salary, 
-            e2.first_name AS manager 
+            e1.id, e1.first_name, e1.last_name, 
+            r.title AS job_title, r.salary, 
+            d.name AS department,
+            CONCAT (e2.first_name,' ',e2.last_name) AS manager
             FROM employee e1 
             LEFT JOIN role r ON e1.role_id = r.id 
             LEFT JOIN department d ON r.department_id = d.id 
@@ -88,7 +89,7 @@ function promptUser() {
               db.query(
                 "INSERT INTO department(name)VALUES(?);",
                 departmentResults.newDepartment,
-                (err, results) => {
+                (err) => {
                   if (err) {
                     console.log(err);
                   }
@@ -133,7 +134,7 @@ function promptUser() {
                     roleResults.roleSalary,
                     roleResults.roleDepartmentId,
                   ],
-                  (err, results) => {
+                  (err) => {
                     if (err) {
                       console.log(err);
                     }
@@ -157,6 +158,7 @@ function promptUser() {
                 name: employee.first_name + " " + employee.last_name,
                 value: employee.id,
               }));
+              employeeChoices.push({ name: "No manager", value: null });
               inquirer
                 .prompt([
                   {
@@ -195,7 +197,7 @@ function promptUser() {
                       employeeResults.employeeRoleId,
                       employeeResults.employeeManagerId,
                     ],
-                    (err, results) => {
+                    (err) => {
                       if (err) {
                         console.log(err);
                       }
