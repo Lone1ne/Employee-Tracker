@@ -57,13 +57,23 @@ function promptUser() {
           );
           break;
         case "View all employees":
-          db.query("SELECT * FROM employee", (err, results) => {
-            if (err) {
-              console.log(err);
+          db.query(
+            `SELECT 
+            e1.first_name, e1.last_name, 
+            r.title AS role, r.salary, 
+            e2.first_name AS manager 
+            FROM employee e1 
+            LEFT JOIN role r ON e1.role_id = r.id 
+            LEFT JOIN department d ON r.department_id = d.id 
+            LEFT JOIN employee e2 ON e1.manager_id = e2.id`,
+            (err, results) => {
+              if (err) {
+                console.log(err);
+              }
+              console.table(results);
+              promptUser();
             }
-            console.table(results);
-            promptUser();
-          });
+          );
           break;
         case "Add a department":
           inquirer
@@ -142,54 +152,61 @@ function promptUser() {
               name: role.title,
               value: role.id,
             }));
-            inquirer
-              .prompt([
-                {
-                  type: "input",
-                  name: "employeeFirstName",
-                  message: "Employee first name: ",
-                },
-                {
-                  type: "input",
-                  name: "employeeLastName",
-                  message: "Employee last name: ",
-                },
-                {
-                  type: "list",
-                  name: "employeeRoleId",
-                  message: "Role: ",
-                  choices: roleChoices,
-                },
-                {
-                  type: "number",
-                  name: "employeeManagerId",
-                  message: "Manager ID: ",
-                },
-              ])
-              .then((employeeResults) => {
-                employeeResults.employeeManagerId =
-                  employeeResults.employeeManagerId
-                    ? employeeResults.employeeManagerId
-                    : null;
-                db.query(
-                  "INSERT INTO employee(first_name, last_name, role_id, manager_id)VALUES(?, ?, ?, ?);",
-                  [
-                    employeeResults.employeeFirstName,
-                    employeeResults.employeeLastName,
-                    employeeResults.employeeRoleId,
-                    employeeResults.employeeManagerId,
-                  ],
-                  (err, results) => {
-                    if (err) {
-                      console.log(err);
+            db.query("SELECT * FROM employee", (err, employees) => {
+              const employeeChoices = employees.map((employee) => ({
+                name: employee.first_name + " " + employee.last_name,
+                value: employee.id,
+              }));
+              inquirer
+                .prompt([
+                  {
+                    type: "input",
+                    name: "employeeFirstName",
+                    message: "Employee first name: ",
+                  },
+                  {
+                    type: "input",
+                    name: "employeeLastName",
+                    message: "Employee last name: ",
+                  },
+                  {
+                    type: "list",
+                    name: "employeeRoleId",
+                    message: "Role: ",
+                    choices: roleChoices,
+                  },
+                  {
+                    type: "list",
+                    name: "employeeManagerId",
+                    message: "Manager: ",
+                    choices: employeeChoices,
+                  },
+                ])
+                .then((employeeResults) => {
+                  employeeResults.employeeManagerId =
+                    employeeResults.employeeManagerId
+                      ? employeeResults.employeeManagerId
+                      : null;
+                  db.query(
+                    "INSERT INTO employee(first_name, last_name, role_id, manager_id)VALUES(?, ?, ?, ?);",
+                    [
+                      employeeResults.employeeFirstName,
+                      employeeResults.employeeLastName,
+                      employeeResults.employeeRoleId,
+                      employeeResults.employeeManagerId,
+                    ],
+                    (err, results) => {
+                      if (err) {
+                        console.log(err);
+                      }
+                      console.log(
+                        `Sucess in adding ${employeeResults.employeeFirstName} ${employeeResults.employeeLastName} to the employee table`
+                      );
+                      promptUser();
                     }
-                    console.log(
-                      `Sucess in adding ${employeeResults.employeeFirstName} ${employeeResults.employeeLastName} to the employee table`
-                    );
-                    promptUser();
-                  }
-                );
-              });
+                  );
+                });
+            });
           });
           break;
       }
