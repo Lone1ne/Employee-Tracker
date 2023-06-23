@@ -209,6 +209,48 @@ function promptUser() {
             });
           });
           break;
+        case "Update an employee role":
+          db.query("SELECT * FROM employee", (err, employees) => {
+            const employeeChoices = employees.map((employee) => ({
+              name: employee.first_name + " " + employee.last_name,
+              value: employee.id,
+            }));
+            db.query("SELECT * FROM role", (err, roles) => {
+              const roleChoices = roles.map((role) => ({
+                name: role.title,
+                value: role.id,
+              }));
+              inquirer
+                .prompt([
+                  {
+                    type: "list",
+                    name: "employee",
+                    message: "Select an employee",
+                    choices: employeeChoices,
+                  },
+                  {
+                    type: "list",
+                    name: "role",
+                    message: "Select a role",
+                    choices: roleChoices,
+                  },
+                ])
+                .then((answers) => {
+                  db.query(
+                    "UPDATE employee SET role_id = ? WHERE id = ?",
+                    [answers.role, answers.employee],
+                    (err) => {
+                      if (err) {
+                        console.log(err);
+                      }
+                      console.log(`Sucess in updating the employee`);
+                      promptUser();
+                    }
+                  );
+                });
+            });
+          });
+          break;
       }
     });
 }
