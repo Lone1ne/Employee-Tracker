@@ -91,43 +91,50 @@ function promptUser() {
             });
           break;
         case "Add a role":
-          inquirer
-            .prompt([
-              {
-                type: "input",
-                name: "roleTitle",
-                message: "Enter the role title: ",
-              },
-              {
-                type: "number",
-                name: "roleSalary",
-                message: "Enter the salary of the role: ",
-              },
-              {
-                type: "number",
-                name: "roleDepartmentId",
-                message: "Department ID: ",
-              },
-            ])
-            .then((roleResults) => {
-              db.query(
-                "INSERT INTO role(title, salary, department_id)VALUES(?, ?, ?);",
-                [
-                  roleResults.roleTitle,
-                  roleResults.roleSalary,
-                  roleResults.roleDepartmentId,
-                ],
-                (err, results) => {
-                  if (err) {
-                    console.log(err);
+          db.query("SELECT * FROM department", (err, departments) => {
+            const departmentChoices = departments.map((department) => ({
+              name: department.name,
+              value: department.id,
+            }));
+            inquirer
+              .prompt([
+                {
+                  type: "input",
+                  name: "roleTitle",
+                  message: "Enter the role title: ",
+                },
+                {
+                  type: "number",
+                  name: "roleSalary",
+                  message: "Enter the salary of the role: ",
+                },
+                {
+                  type: "list",
+                  name: "roleDepartmentId",
+                  message: "Department",
+                  choices: departmentChoices,
+                },
+              ])
+              .then((roleResults) => {
+                db.query(
+                  "INSERT INTO role(title, salary, department_id)VALUES(?, ?, ?);",
+                  [
+                    roleResults.roleTitle,
+                    roleResults.roleSalary,
+                    roleResults.roleDepartmentId,
+                  ],
+                  (err, results) => {
+                    if (err) {
+                      console.log(err);
+                    }
+                    console.log(
+                      `Sucess in adding the ${roleResults.roleTitle} role to the role table`
+                    );
+                    promptUser();
                   }
-                  console.log(
-                    `Sucess in adding the ${roleResults.roleTitle} role to the role table`
-                  );
-                  promptUser();
-                }
-              );
-            });
+                );
+              });
+          });
           break;
         case "Add an employee":
           inquirer
