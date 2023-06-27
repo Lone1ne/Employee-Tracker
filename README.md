@@ -6,7 +6,7 @@ This application is a Content Management System (CMS) for managing a company's e
 
 ## Walkthrough
 
-Watch the walkthrough video here ---> [Employee Tracker Walkthrough Video](https://drive.google.com/file/d/1h4RP5YtOnxess9rlfpfVctjkTbAVui34/view)
+Watch the walkthrough video here ---> [Employee Tracker Walkthrough Video](https://drive.google.com/file/d/1h4RP5YtOnxess9rlfpfVctjkTbAVui34/view?usp=sharing)
 
 ## Table of Contents
 
